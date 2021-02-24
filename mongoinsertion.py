@@ -62,14 +62,21 @@ for file in company_holdings:
                                                            csv_to_json(os.path.join(company_root_path, file))}}})
 
 #insert changes into database
-#for file in company_changes:
-    # check if the changes do not exist yet. If so, make a new one
-#    if collection_hedge_fund.count_documents({'_id': file.split('-')[0],
-  #                                            'changes': }, limit=1) == 0:
- #       if
-  #  ,
-   # 'changes': {(file.split('-')[1]).split('.')[0]:
-    #                csv_to_json(os.path.join(change_root_path, file))}
+for file in company_changes:
+    # check if the changes field does not exist yet. If so, make a new one
+    # if collection_hedge_fund.count_documents({'_id': file.split('-')[0],
+    #                                           'changes': 0}, limit=1) == 0:
+        collection_hedge_fund.update_one({'_id': file.split('-')[0]},
+                                          {'$set': {'changes': {(file.split('-')[1]).split('.')[0]:
+                                                                     changes_csv_to_json(
+                                                                         os.path.join(change_root_path, file))}}},
+                                         upsert=True)
+    # else:
+    #     # Otherwise update field in document
+    #     collection_hedge_fund.update_one({'_id': file.split('-')[0]},
+    #                                      {'$set': {'changes': {(file.split('-')[1]).split('.')[0]:
+    #                                                                 changes_csv_to_json(
+    #                                                                     os.path.join(change_root_path, file))}}})
 
 # print out documents in collection
 #for document in db.hedge_fund.find({} , { 'holdings': 0} ):
@@ -81,6 +88,7 @@ for file in company_holdings:
 
 # print out how many distinct id's
 # print(len(db.hedge_fund.distinct('_id')))
-#print(db.hedge_fund.find({'changes': {'$exists': True}}))
+#print(len(db.hedge_fund.distinct('changes')))
+#print(db.hedge_fund.find_one_and_update({'_id': "850529", 'change': 0}, {'$inc': {'count': 1}, '$set': {'done': True}}))
 
 
