@@ -7,7 +7,6 @@ def main():
     import edgar
     edgar.download_index('/Users/Tim/PycharmProjects/Stat359Form13FParsing/index_files', 2021)
 
-
 if __name__ == '__main__':
     main()
 
