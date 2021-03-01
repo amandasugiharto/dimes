@@ -56,9 +56,12 @@ for file in company_holdings:
                                          csv_to_json(
                                              os.path.join(company_root_path, file))}}},
                                      upsert=True)
-    collection_holdings.insert_one({'date': (file.split('-')[1]).split('.')[0],
+    collection_holdings.update_one({'_id': file.split('.')[0]},
+                                   {'$set': {'_id': file.split('.')[0],
+                                       'date': (file.split('-')[1]).split('.')[0],
                                     'holding': csv_to_json(os.path.join(company_root_path, file)),
-                                    'company': file.split('-')[0]})
+                                    'company': file.split('-')[0]}},
+                                   upsert=True)
 
 # insert changes info into database
 for file in company_changes:
@@ -67,19 +70,22 @@ for file in company_changes:
                                          changes_csv_to_json(
                                              os.path.join(change_root_path, file))}}},
                                      upsert=True)
-    collection_changes.insert_one({'number': (file.split('-')[1]).split('.')[0],
+    collection_changes.update_one({'_id': file.split('.')[0]},
+                                  {'$set': {'_id': file.split('.')[0],
+                                      'number': (file.split('-')[1]).split('.')[0],
                                    'change': changes_csv_to_json(os.path.join(change_root_path, file)),
-                                   'company': file.split('-')[0]})
+                                   'company': file.split('-')[0]}},
+                                  upsert=True)
 
 # Testing if collections setup properly
 # for document in collection_changes.find({'company': "850529" } ):
-#     print(document)
+#    print(document)
 
 # for document in collection_holdings.find({'company': "850529" } ):
-#     print(document)
+#    print(document)
 
 # for document in collection_hedge_fund.find({'_id': "850529" } ):
-#     print(document)
+#    print(document)
 
 # find the 3 most recent holdings for that company
 # last_10_holdings = collection_holdings.find({'company': '850529'}).sort([('date', -1)]).limit(3)
