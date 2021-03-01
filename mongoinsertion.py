@@ -52,30 +52,40 @@ def changes_csv_to_json(filename, header=None):  # read csv into json format
 for file in company_holdings:
     # Update/insert into database
     collection_hedge_fund.update_one({'_id': file.split('-')[0]},
-                                     {'$set': {'newestholding': {(file.split('-')[1]).split('.')[0]:
-                                         csv_to_json(
-                                             os.path.join(company_root_path, file))}}},
+                                     {'$set': {'newestholding': csv_to_json(os.path.join(company_root_path, file)),
+                                               'date': (file.split('-')[1]).split('.')[0]}},
                                      upsert=True)
     collection_holdings.update_one({'_id': file.split('.')[0]},
                                    {'$set': {'_id': file.split('.')[0],
-                                       'date': (file.split('-')[1]).split('.')[0],
-                                    'holding': csv_to_json(os.path.join(company_root_path, file)),
-                                    'company': file.split('-')[0]}},
+                                             'date': (file.split('-')[1]).split('.')[0],
+                                             'holding': csv_to_json(os.path.join(company_root_path, file)),
+                                             'company': file.split('-')[0]}},
                                    upsert=True)
 
 # insert changes info into database
 for file in company_changes:
     collection_hedge_fund.update_one({'_id': file.split('-')[0]},
-                                     {'$set': {'newestchange': {(file.split('-')[1]).split('.')[0]:
-                                         changes_csv_to_json(
-                                             os.path.join(change_root_path, file))}}},
+                                     {'$set': {'newestchange': changes_csv_to_json(os.path.join(change_root_path, file)),
+                                               'rank': (file.split('-')[1]).split('.')[0]}},
                                      upsert=True)
     collection_changes.update_one({'_id': file.split('.')[0]},
                                   {'$set': {'_id': file.split('.')[0],
-                                      'number': (file.split('-')[1]).split('.')[0],
-                                   'change': changes_csv_to_json(os.path.join(change_root_path, file)),
-                                   'company': file.split('-')[0]}},
+                                            'rank': (file.split('-')[1]).split('.')[0],
+                                            'change': changes_csv_to_json(os.path.join(change_root_path, file)),
+                                            'company': file.split('-')[0]}},
                                   upsert=True)
+
+
+# Find newest holding dictionary and turn it into pandas df, given a cik
+def dict_to_df(cik):
+    out = pd.DataFrame()
+    data = collection_hedge_fund.find_one({'_id': cik}, {'_id': False, 'newestholding': True})
+    for line in data.get('newestholding'):
+        out = out.append([line], ignore_index=True)
+    return out
+
+
+# print(dict_to_df('850529'))
 
 # Testing if collections setup properly
 # for document in collection_changes.find({'company': "850529" } ):
@@ -92,5 +102,9 @@ for file in company_changes:
 # for document in last_10_holdings:
 #     print(document)
 
+# Find most recent holding of a certain company and place into pandas dataframe. Format of {'Column name': 'Entry', 'Column name': 'Entry', ... }
+# def find_newest():
+data = collection_hedge_fund.find_one({'_id': '850529'}, {'_id': False, 'newestholding': True})
+print(data)
 
-
+#pd.DataFrame(
