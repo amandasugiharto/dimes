@@ -39,7 +39,7 @@ def calculate_secondary(old_filing, new_filing):
             sold_out.append(False)
     old_holdings.loc[:, "soldout_next"] = sold_out
 
-    # Make dataframes with of the different holdings in the 3 scenarios and reindex
+    # Make dataframes with the different holdings in the 3 scenarios and reindex
     sold_out_df = old_holdings[old_holdings["soldout_next"] == True]
     new_df = new_holdings[new_holdings["new"] == True]
     same_df = new_holdings[new_holdings["new"] == False]
@@ -48,7 +48,7 @@ def calculate_secondary(old_filing, new_filing):
     new_df.index = new_df["CUSIP"]
     same_df.index = same_df["CUSIP"]
 
-    # Get a list of all past and current holdings
+    # Get a list of all past (previous period) and current holdings
     union_holdings = list(set().union(new_holdings_list, old_holdings_list))
 
     # Initialize a dataframe of all holdings across both filings and reindex
