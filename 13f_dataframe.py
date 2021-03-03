@@ -26,6 +26,25 @@ all_hedgefunds["date"] = pd.to_datetime(all_hedgefunds["date"])
 # all_hedgefunds_new = all_hedgefunds[all_hedgefunds["date"] >= "2007-01-01"]
 all_hedgefunds_new2 = all_hedgefunds[all_hedgefunds["date"] >= "2012-01-01"]
 
+# html = requests.get("https://www.sec.gov/Archives/edgar/data/850529/0000850529-20-000010-index.html").text
+# soup = bs4.BeautifulSoup(html, 'lxml')
+# rows = soup.find_all('tr')[1:]
+#
+# soup.find("td", text="INFORMATION TABLE").find_previous_sibling("td").a.get("href")
+
+# is_new = []
+# for link in all_hedgefunds_new["html"]:
+#     html = requests.get(link).text
+#     soup = bs4.BeautifulSoup(html, 'lxml')
+#     rows = soup.find_all('tr')[1:]
+#     if soup.find("td", text="INFORMATION TABLE") != None:
+#         is_new.append(True)
+#     else:
+#         is_new.append(False)
+#     time.sleep(0.15)
+#
+# all_hedgefunds_new["has_info_table"] = is_new
+
 # Get the html pages that have the "information table" format (latest format)
 is_new2 = []
 for link in all_hedgefunds_new2["html"]:
@@ -36,7 +55,8 @@ for link in all_hedgefunds_new2["html"]:
         is_new2.append(True)
     else:
         is_new2.append(False)
-    time.sleep(0.15)
+    # Don't go over SEC's traffic quota of 10 requests per second
+    time.sleep(0.11)
 
 # Append indicator on whether or not has the new format to original dataframe (with more recent filings)
 all_hedgefunds_new2.loc[:,"has_info_table"] = is_new2
@@ -48,7 +68,7 @@ infotable_links = []
 for link in all_hedgefunds_new2_infotable["html"]:
     html = requests.get(link).text
     soup = bs4.BeautifulSoup(html, 'lxml')
-    # rows = soup.find_all('tr')[1:]
+    rows = soup.find_all('tr')[1:]
     try:
         infotable = soup.find("td", text="INFORMATION TABLE").find_previous_sibling("td").a.get("href")
         infotable_links.append(infotable)
@@ -63,6 +83,12 @@ all_hedgefunds_new2_infotable.loc[:,"infotable_link"] = "https://www.sec.gov" + 
 # Checking how many extractions failed
 all_hedgefunds_new2_infotable["infotable_link"].isna().sum()
 
+# html = requests.get("https://www.sec.gov/Archives/edgar/data/1159159/000090266416007861/xslForm13F_X01/infotable.xml").text
+# soup = bs4.BeautifulSoup(html, 'lxml')
+# table = soup.find_all('table')[-1]
+
+# table = pd.read_html("https://www.sec.gov/Archives/edgar/data/1159159/000090266416007861/xslForm13F_X01/infotable.xml", header = 2)[-1]
+
 # Get the actual holdings from the information table links (will get list of dataframes)
 holdings_df = []
 for info_link in all_hedgefunds_new2_infotable["infotable_link"]:
@@ -73,9 +99,11 @@ for info_link in all_hedgefunds_new2_infotable["infotable_link"]:
         holdings_df.append("Unable to get holdings")
     time.sleep(0.1)
 
+# test = pd.read_fwf("https://www.sec.gov/Archives/edgar/data/850529/000085052913000010/llllll.txt")
+
 # Add the holdings dataframes to each of the observations (not necessary, hence dropping it again)
-all_hedgefunds_new2_infotable.loc[:,"holdings"] = holdings_df
-all_hedgefunds_new2_infotable = all_hedgefunds_new2_infotable.drop(["holdings"], axis = 1)
+# all_hedgefunds_new2_infotable.loc[:,"holdings"] = holdings_df
+# all_hedgefunds_new2_infotable = all_hedgefunds_new2_infotable.drop(["holdings"], axis = 1)
 
 # Reindex the dataframe with sequential index
 all_hedgefunds_new2_infotable.index = range(0,len(holdings_df))
