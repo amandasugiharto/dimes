@@ -31,7 +31,8 @@ database_list = client.list_database_names()
 if "13F" in database_list:
     client.drop_database("13F")
 db = client['13F']
-# make a new collection called 'hedge_fund', 'holdings', and 'changes'. 'hedge_fund' holds the newest change + holding
+# make a new collection called 'hedge_fund', 'holdings', and 'changes'.
+# 'hedge_fund' holds the newest change + holding
 collection_hedge_fund = db['hedge_fund']
 collection_holdings = db['holdings']
 collection_changes = db['changes']
@@ -66,11 +67,11 @@ for file in company_holdings:
 for file in company_changes:
     collection_hedge_fund.update_one({'_id': file.split('-')[0]},
                                      {'$set': {'newestchange': changes_csv_to_json(os.path.join(change_root_path, file)),
-                                               'rank': (file.split('-')[1]).split('.')[0]}},
+                                               'changedate': (file.split('-')[1]).split('.')[0]}},
                                      upsert=True)
     collection_changes.update_one({'_id': file.split('.')[0]},
                                   {'$set': {'_id': file.split('.')[0],
-                                            'rank': (file.split('-')[1]).split('.')[0],
+                                            'date': (file.split('-')[1]).split('.')[0],
                                             'change': changes_csv_to_json(os.path.join(change_root_path, file)),
                                             'company': file.split('-')[0]}},
                                   upsert=True)
@@ -104,7 +105,7 @@ def dict_to_df(cik):
 
 # Find most recent holding of a certain company and place into pandas dataframe. Format of {'Column name': 'Entry', 'Column name': 'Entry', ... }
 # def find_newest():
-data = collection_hedge_fund.find_one({'_id': '850529'}, {'_id': False, 'newestholding': True})
-print(data)
+# data = collection_hedge_fund.find_one({'_id': '850529'}, {'_id': False, 'newestholding': True})
+# print(data)
 
 #pd.DataFrame(
