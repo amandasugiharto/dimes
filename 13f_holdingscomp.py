@@ -5,7 +5,6 @@ import itertools
 root_path = "/Users/amandasugiharto/Documents/coding/PycharmProjects/pythonProject1/per_company_date"
 company_holdings = sorted(os.listdir(root_path))
 
-
 # Function to calculate secondary dataframe from old and new filings
 
 def calculate_secondary(old_filing, new_filing):
@@ -120,4 +119,5 @@ for cik in cik_list_unique:
     filing_list_length = len(filing_list)
     for i in range(0,filing_list_length-1):
         df = calculate_secondary(filing_list[i], filing_list[i+1])
-        df.to_csv("/Users/amandasugiharto/Documents/coding/PycharmProjects/pythonProject1/change_dfs/" + cik + "-" + str(i) + ".csv")
+        new_date = filing_list[i+1].split("-")[1].split(".")[0]
+        df.to_csv("/Users/amandasugiharto/Documents/coding/PycharmProjects/pythonProject1/change_dfs/" + cik + "-" + str(new_date) + ".csv")
