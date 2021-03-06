@@ -62,6 +62,7 @@ find_forms('13F', encoding="mac_roman")
 # Specify path with new 13F files per company and get list of files
 root_path = os.path.join(os.getcwd(), "index_files_new/13F")
 company_files = os.listdir(root_path)
+company_files.remove(".DS_Store")
 
 # define function to clean new filings and save parsed new filings per company per date
 def clean_new_filings(company_files, folder_path):
@@ -168,3 +169,35 @@ def clean_new_filings(company_files, folder_path):
             pass
 
 clean_new_filings(company_files, "per_company_date_new")
+
+
+# Establish path to folder with new holdings per company per date
+new_filings_path = os.path.join(os.getcwd(), "per_company_date_new")
+
+# Define function to calculate new change dataframes and save to csv
+def calculate_new_changes(new_filings_path, folder_path):
+    # Import function to get latest holding in database as dataframe
+    from mongoinsertion import dict_to_df
+
+    new_filings = os.listdir(new_filings_path)
+    new_filings.remove(".DS_Store")
+
+    # Get list of CIKs that have a new filing
+    new_cik_list = []
+    for file in new_filings:
+        cik = file.split("-")[0]
+        new_cik_list.append(cik)
+
+    # Calculate the change dataframes based on latest holding in database and new holding being added
+    from calculate_change import calculate_secondary
+    import pandas as pd
+    for cik in new_cik_list:
+        latest_in_db = dict_to_df(cik)
+        newer_filing_file = [file for file in new_filings if file.startswith(cik)]
+        newer_filing = pd.read_csv(os.path.join(new_filings_path, newer_filing_file[0]))
+        change_df = calculate_secondary(latest_in_db, newer_filing)
+        new_date = newer_filing_file[0].split("-")[1].split(".")[0]
+        change_df.to_csv(os.getcwd() + "/" + folder_path + "/" + str(cik) + "-" + str(
+            new_date) + ".csv")
+
+calculate_new_changes(new_filings_path, "change_dfs_new")
