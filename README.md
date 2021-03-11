@@ -386,6 +386,124 @@ You are also able to complete Step 1 of this process by using the command line f
 
 ### Part 3: Parse and Clean New Filings
 
+After you have your list of filings, you must now clean the filings and read the data into a dataframe. Similarly to in Step 1 of the project, you must also clean the columns within those dataframes and get the links for the newest filings. After reindexing and appending the dataframes that you have created, you can save the new cleaned files which can be used in calculating changes and inserted into MongoDB.
+
+```python
+# define function to clean new filings and save parsed new filings per company per date
+def clean_new_filings(company_files, folder_path):
+    import pandas as pd
+    # Initialize empty dataframe
+    all_hedgefunds = pd.DataFrame()
+
+    # Read in the data into a dataframe
+    for file in company_files:
+        path = os.path.join(root_path, file)
+        hedgefund_item = pd.read_csv(path, sep="|", index_col=False,
+                      names=["cik", "name", "form_type", "date", "txt", "html"])
+        all_hedgefunds = all_hedgefunds.append(hedgefund_item)
+
+    # Clean the html and date columns
+    all_hedgefunds["html"] = "https://www.sec.gov/Archives/" + all_hedgefunds["html"]
+    all_hedgefunds["date"] = pd.to_datetime(all_hedgefunds["date"])
+
+    import requests
+    import bs4
+    import time
+
+    # Get infotable links for new filings
+    infotable_links = []
+    for link in all_hedgefunds["html"]:
+        html = requests.get(link).text
+        soup = bs4.BeautifulSoup(html, 'lxml')
+        try:
+            infotable = soup.find("td", text="INFORMATION TABLE").find_previous_sibling("td").a.get("href")
+            infotable_links.append(infotable)
+        except AttributeError:
+            try:
+                infotable = soup.find("td", text="INFORMATION TABLE").find_next_sibling("td").a.get("href")
+                infotable_links.append(infotable)
+            except:
+                infotable_links.append(None)
+        time.sleep(0.11)
+
+    # Add infotable links to dataframe
+    all_hedgefunds.loc[:,"infotable_link"] = infotable_links
+    all_hedgefunds.loc[:,"infotable_link"] = "https://www.sec.gov" + all_hedgefunds["infotable_link"]
+
+    # Reindex the dataframe with sequential index
+    all_hedgefunds.index = range(0,len(all_hedgefunds.index))
+
+    # get the ammendments dataframes and the dataframes to ammend
+    ammendments = all_hedgefunds[all_hedgefunds["form_type"] == "13F-HR/A"]
+    to_ammend = all_hedgefunds[(all_hedgefunds["form_type"] == "13F-HR") & (all_hedgefunds["cik"].isin(ammendments["cik"].tolist()))]
+
+    # update the to_ammend dataframes with the ammendments
+    ammended_holdings = []
+    for cik in to_ammend["cik"]:
+        holding_to_ammend_link = to_ammend[to_ammend["cik"] == cik].get("infotable_link")
+        holding_to_ammend = pd.DataFrame()
+        for link in holding_to_ammend_link:
+            holding_to_ammend = pd.read_html(link, header=2)[-1]
+        holding_to_ammend.index = holding_to_ammend["CUSIP"]
+        ammendment_entries_links = ammendments[ammendments["cik"] == cik].get("infotable_link")
+        for ammendment_link in ammendment_entries_links:
+            ammendment_entry = pd.read_html(ammendment_link, header=2)[-1]
+            ammendment_entry.index = ammendment_entry["CUSIP"]
+            holding_to_ammend.update(ammendment_entry)
+        ammended_holdings.append(holding_to_ammend)
+
+    # Removing entries with ammendments from big dataframe
+    all_hedgefunds_no_ammend = all_hedgefunds[all_hedgefunds["cik"].isin(to_ammend["cik"].unique().tolist()) == False]
+
+    # Making a list of dataframes for holdings with no ammendments
+    holdings_no_ammend_df = []
+    for info_link in all_hedgefunds_no_ammend["infotable_link"]:
+        try:
+            df = pd.read_html(info_link, header=2)[-1]
+            holdings_no_ammend_df.append(df)
+        except:
+            holdings_no_ammend_df.append("Unable to get holdings")
+        time.sleep(0.1)
+
+    # Reindex sequentially
+    all_hedgefunds_no_ammend.index = range(0,len(holdings_no_ammend_df))
+
+    # Save the files of non-ammended holdings per company per filing in name format "cik-date.csv"
+    for i in range(0,len(holdings_no_ammend_df)):
+        holdings = holdings_no_ammend_df[i]
+        cik = all_hedgefunds_no_ammend["cik"][i]
+        date = all_hedgefunds_no_ammend["date"][i].strftime("%Y%m%d")
+        file_name = folder_path + "/" + str(cik) + "-" + str(date) + ".csv"
+        try:
+            holdings.to_csv(file_name)
+        except AttributeError:
+            pass
+
+    # Reindex sequentially
+    to_ammend.index = range(0,len(ammended_holdings))
+
+    # Save the files of ammended holdings per company per filing
+    for i in range(0,len(ammended_holdings)):
+        holdings = ammended_holdings[i]
+        cik = to_ammend["cik"][i]
+        date = to_ammend["date"][i].strftime("%Y%m%d")
+        file_name = folder_path + "/" + str(cik) + "-" + str(date) + ".csv"
+        try:
+            holdings.to_csv(file_name)
+        except AttributeError:
+            pass
+
+clean_new_filings(company_files, "per_company_date_new")
+
+
+# Establish path to folder with new holdings per company per date
+new_filings_path = os.path.join(os.getcwd(), "per_company_date_new")
+```
+
+Comments in the code above help to explain what each part of the code is doing.
+
+*Much of this process is a repeat from Step 1 of the project.*
+
 ### Parts 4/5: Calculate Changes from Last Filing & Update Database in MongoDB
 Next, you would like to calculate the changes from the last filing and add these changes into your database on MongoDB. This can be done with the following code (there are comments within the code to demonstrate what each part of the code is doing).
 
