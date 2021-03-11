@@ -321,9 +321,13 @@ There are five main parts of periodically updating the database within MongoDB.
 <img src="https://github.com/austenw1899/PICTURES-FOR-BLOG/blob/main/4.jpg?raw=true"/>
 </p>
 
-Many of these parts are reusing code from earlier steps in the process.
+### Note
 
-### Part 1: Get Most Recent Filings from SEC
+Occassionally, a hedge fund will change its' name or will go out of business entirely. Make sure to check for these sorts of things, as it could create errors in the formatting of your database.
+
+*Many of these parts are reusing code from earlier steps in the process.*
+
+### Parts 1: Get Most Recent Filings from SEC
 
 ### Part 2: Sort 13-F Files
 
