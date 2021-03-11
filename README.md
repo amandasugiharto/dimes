@@ -42,7 +42,7 @@ pip install python-edgar
 python run.py -y 1993
 type *.tsv > master.tsv
 find "CIK" C:\Users\...\master.tsv > CIK.txt
-find "Company Name" C:\Users\...\CIK.tsv > Cik2.txt
+find "Company Name" C:\Users\...\CIK.tsv > CIK2.txt
 type CIK.txt | find "13F-HR" > 000CIK.txt (or 0000CIK.txt if six digit CIK)
 ```
 
