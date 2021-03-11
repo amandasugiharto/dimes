@@ -329,11 +329,39 @@ Many of these parts are reusing code from earlier steps in the process.
 
 ### Part 3: Parse and Clean New Filings
 
-### Part 4: Calculate Changes from Last Filing
+### Parts 4/5: Calculate Changes from Last Filing & Update Database in MongoDB
+Next, you would like to calculate the changes from the last filing and add these changes into your database on MongoDB. This can be done with the following code (there are comments within the code to demonstrate what each part of the code is doing).
 
-### Part 5: Update Database
+```python
+def calculate_new_changes(new_filings_path, folder_path):
+    # Import function to get latest holding in database as dataframe
+    from mongoinsertion import dict_to_df
 
-*If you'd like to see more or the entire code for updating the datbase click below*
+    new_filings = os.listdir(new_filings_path)
+    new_filings.remove(".DS_Store")
+
+    # Get list of CIKs that have a new filing
+    new_cik_list = []
+    for file in new_filings:
+        cik = file.split("-")[0]
+        new_cik_list.append(cik)
+
+    # Calculate the change dataframes based on latest holding in database and new holding being added
+    from calculate_change import calculate_secondary
+    import pandas as pd
+    for cik in new_cik_list:
+        latest_in_db = dict_to_df(cik)
+        newer_filing_file = [file for file in new_filings if file.startswith(cik)]
+        newer_filing = pd.read_csv(os.path.join(new_filings_path, newer_filing_file[0]))
+        change_df = calculate_secondary(latest_in_db, newer_filing)
+        new_date = newer_filing_file[0].split("-")[1].split(".")[0]
+        change_df.to_csv(os.getcwd() + "/" + folder_path + "/" + str(cik) + "-" + str(
+            new_date) + ".csv")
+
+calculate_new_changes(new_filings_path, "change_dfs_new")
+```
+You can repeat Step 4 of this project to continuosly add 13-F filings as they are released and keep an up to date database on the long term holdings of the top hedge funds in the United States!
+*If you'd like to see more or the entire code for updating the datbase click below.*
 
 [Link to Code for Updating Database](https://github.com/amandasugiharto/stat359/blob/main/update_database.py)
 
