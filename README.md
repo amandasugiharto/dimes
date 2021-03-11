@@ -37,9 +37,14 @@ All of our data for this project is from the SEC website, and is downloaded usin
 
 Using the command lines below, subbing in your own pathways, you can download python-edgar and index filings.
 
-<p align="left">
-<img src="https://github.com/austenw1899/PICTURES-FOR-BLOG/blob/main/1a.jpg?raw=true"/>
-</p>
+```
+pip install python-edgar
+python run.py -y 1993
+type *.tsv > master.tsv
+find "CIK" C:\Users\...\master.tsv > CIK.txt
+find "Company Name" C:\Users\...\CIK.tsv > Cik2.txt
+type CIK.txt | find "13F-HR" > 000CIK.txt (or 0000CIK.txt if six digit CIK)
+```
 
 After you have all the indexed filings, ensure your path is set correctly and initialize an empty dataframe. After that, you can load in 13F's into the dataframes.
 
@@ -316,6 +321,8 @@ There are five main parts of periodically updating the database within MongoDB.
 <img src="https://github.com/austenw1899/PICTURES-FOR-BLOG/blob/main/4.jpg?raw=true"/>
 </p>
 
+Many of these parts are reusing code from earlier steps in the process.
+
 ### Part 1: Get Most Recent Filings from SEC
 
 ### Part 2: Sort 13-F Files
@@ -325,6 +332,10 @@ There are five main parts of periodically updating the database within MongoDB.
 ### Part 4: Calculate Changes from Last Filing
 
 ### Part 5: Update Database
+
+*If you'd like to see more or the entire code for updating the datbase click below*
+
+[Link to Code for Updating Database](https://github.com/amandasugiharto/stat359/blob/main/update_database.py)
 
 <h1 align="center">
 In Conclusion
