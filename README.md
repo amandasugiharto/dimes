@@ -327,9 +327,61 @@ Occassionally, a hedge fund will change its' name or will go out of business ent
 
 *Many of these parts are reusing code from earlier steps in the process.*
 
-### Parts 1: Get Most Recent Filings from SEC
+### Parts 1/2: Get Most Recent Filings from SEC & Sort 13-F Files
 
-### Part 2: Sort 13-F Files
+The code for doing parts one and two of the database update is listed below. The "def main" commands are Windows specific; you do not need to write this out if on Apple computer.
+
+```python
+# import json
+import os
+
+# this def main stuff is Windows specific, downloading the newest index file for Q1 2021
+def main():
+    import edgar
+    edgar.download_index(os.path.join(os.getcwd(),"index_files_new"), 2021)
+
+if __name__ == '__main__':
+    main()
+
+# function to find the correct companies
+def find_companies(company_list):
+    for company in company_list:
+        infile = open(os.path.join(os.getcwd(), "index_files_new/2021-QTR1.tsv"),
+                      'r')  # This line is referencing the new index file
+        outfile = open(os.path.join(os.getcwd(),"index_files_new/companies/") + company[1] + '.txt',
+                       'w')
+        for line in infile:
+            if line.find(company[0]) != -1:
+                outfile.write(line)
+            else:
+                continue
+        infile.close()
+        outfile.close()
+
+# function to find the correct forms
+def find_forms(form_string, encoding = "utf-8"):
+    directory = os.path.join(os.getcwd(), "index_files_new/companies")
+    for filename in os.listdir(directory):
+        infile = open(os.path.join(directory, filename), 'r', encoding=encoding)
+        outfile = open(os.path.join(os.getcwd(), "index_files_new/") + form_string + '/' + filename,
+                       'w')
+        for line in infile:
+            if line.find(form_string) != -1:
+                outfile.write(line)
+            else:
+                continue
+        infile.close()
+        outfile.close()
+
+# write out new files
+find_companies(data)
+find_forms('13F', encoding="mac_roman")
+
+# Specify path with new 13F files per company and get list of files
+root_path = os.path.join(os.getcwd(), "index_files_new/13F")
+company_files = os.listdir(root_path)
+company_files.remove(".DS_Store")
+```
 
 ### Part 3: Parse and Clean New Filings
 
