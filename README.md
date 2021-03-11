@@ -382,6 +382,7 @@ root_path = os.path.join(os.getcwd(), "index_files_new/13F")
 company_files = os.listdir(root_path)
 company_files.remove(".DS_Store")
 ```
+You are also able to complete Step 1 of this process by using the command line from Step 1 and changing the year from 1993 to whatever the current year is. That will download all the filings on the SEC website since the beginning of the current year.
 
 ### Part 3: Parse and Clean New Filings
 
