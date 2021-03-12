@@ -558,7 +558,7 @@ In Conclusion
 </p>
 
 <h6 align="center">
-Thanks for reading! Please consult the GitHub main branch for further clarification on the code or files.
+Thanks for reading! Please consult the src branch on our GitHub page for further clarification on the code or files.
 </h6>
 
 
