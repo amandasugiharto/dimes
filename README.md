@@ -307,7 +307,7 @@ def dict_to_df(cik):
 <img src="https://github.com/austenw1899/PICTURES-FOR-BLOG/blob/main/3.jpg?raw=true"/>
 </p>
 
-An image of what our database within MongoDB looks like is above. Again, this part of the process is very customizable, and you can format/create your database however you want within MongoDB once you have converted your files into a json format.
+An image of what our database within MongoDB looks like is above. This is through the MongoDB Compass GUI that can be downloaded as an extra application. This is just another way to look at the database in addition to the command line or through Python. Again, this part of the process is very customizable, and you can format/create your database however you want within MongoDB once you have converted your files into a json format.
 
 [Link to Code for Creating MongoDB Database](https://github.com/amandasugiharto/dimes/blob/main/code/mongoinsertion.py)
 
@@ -323,7 +323,7 @@ There are five main parts of periodically updating the database within MongoDB.
 
 ### Note
 
-Occassionally, a hedge fund will change its' name or will go out of business entirely. Make sure to check for these sorts of things, as it could create errors in the formatting of your database.
+Occassionally, a hedge fund will change its name or will go out of business entirely. Make sure to check for these sorts of things, as it could create errors in the formatting of your database.
 
 *Many of these parts are reusing code from earlier steps in the process.*
 
