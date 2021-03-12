@@ -152,7 +152,7 @@ Below is an example of what the parsed dataframe of the quarterly 13F of a singl
 <img src="https://github.com/austenw1899/PICTURES-FOR-BLOG/blob/main/ParsedDataFrame.jpg?raw=true"/>
 </p>
 
-[Link to Code for Framing Parsed Data](https://github.com/amandasugiharto/stat359/blob/main/13f_dataframe.py)
+[Link to Code for Framing Parsed Data](https://github.com/amandasugiharto/dimes/blob/main/code/13f_dataframe.py)
 
 <h1 align="center">
 Step 2: Calculate Change in Holdings between Quarters
@@ -212,7 +212,7 @@ for cik in cik_list_unique:
         new_date = filing_list[i+1].split("-")[1].split(".")[0]
         df.to_csv("PathforChangeFilings" + cik + "-" + str(new_date) + ".csv")
 ```
-[Link to Code for Calculating Change](https://github.com/amandasugiharto/stat359/blob/main/calculate_change.py)
+[Link to Code for Calculating Change](https://github.com/amandasugiharto/dimes/blob/main/code/calculate_change.py)
 
 <h1 align="center">
 Step 3: Integrate Data into MongoDB
@@ -309,7 +309,7 @@ def dict_to_df(cik):
 
 An image of what our database within MongoDB looks like is above. Again, this part of the process is very customizable, and you can format/create your database however you want within MongoDB once you have converted your files into a json format.
 
-[Link to Code for Creating MongoDB Database](https://github.com/amandasugiharto/stat359/blob/main/mongoinsertion.py)
+[Link to Code for Creating MongoDB Database](https://github.com/amandasugiharto/dimes/blob/main/code/mongoinsertion.py)
 
 <h1 align="center">
 Step 4: Periodical Updates
@@ -538,7 +538,7 @@ calculate_new_changes(new_filings_path, "change_dfs_new")
 You can repeat Step 4 of this project to continuosly add 13-F filings as they are released and keep an up to date database on the long term holdings of the top hedge funds in the United States!
 *If you'd like to see more or the entire code for updating the datbase click below.*
 
-[Link to Code for Updating Database](https://github.com/amandasugiharto/stat359/blob/main/update_database.py)
+[Link to Code for Updating Database](https://github.com/amandasugiharto/dimes/blob/main/code/update_database.py)
 
 <h1 align="center">
 In Conclusion
