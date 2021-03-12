@@ -35,7 +35,7 @@ All of our data for this project is from the SEC website, and is downloaded usin
 
 ### Getting 13-F's
 
-Using the command lines below, subbing in your own pathways, you can download python-edgar and index filings.
+Using the command lines below, subbing in your own pathways, you can install python-edgar and download index filings from 1993.
 
 ```
 pip install python-edgar
@@ -46,7 +46,7 @@ find "Company Name" C:\Users\...\CIK.tsv > CIK2.txt
 type CIK.txt | find "13F-HR" > 000CIK.txt (or 0000CIK.txt if six digit CIK)
 ```
 
-After you have all the indexed filings, ensure your path is set correctly and initialize an empty dataframe. After that, you can load in 13F's into the dataframes.
+After you have all the index filings, ensure your path is set correctly and initialize an empty dataframe. After that, you can load in 13F's into the dataframes.
 
 ```python
 root_path = "/Users/..."
@@ -61,7 +61,7 @@ for file in company_files:
     all_hedgefunds = all_hedgefunds.append(hedgefund_item)
 ```
 
-Next, clean the html and date columns of the dataframes and subset the data to 2013 or later (process does not work on forms before 2013). Get the html pages that have the "information table" format. 
+Next, clean the html and date columns of the dataframes and subset the data to 2013 or later (process does not work on forms before 2013 due to formatting inconsistencies). Get the html pages that have the "information table" format. 
 
 ```python
 all_hedgefunds["html"] = "https://www.sec.gov/Archives/" + all_hedgefunds["html"]
@@ -82,7 +82,7 @@ for link in all_hedgefunds_new2["html"]:
     time.sleep(0.11)
 ```
 
-This part of the process is accomplished using the Beautiful Soup package. The SEC also has a traffic quota, so it is important to ensure that you do not go over that quota.
+This part of the process is accomplished using the requests and Beautiful Soup packages. The SEC also has a traffic quota, so it is important to ensure that you do not go over that quota.
 Next, you'll want to append an indicator to show whether or not there is a new format in the received filing.
 
 ```python
@@ -105,7 +105,7 @@ for link in all_hedgefunds_new2_infotable["html"]:
 all_hedgefunds_new2_infotable.loc[:,"infotable_link"] = infotable_links
 all_hedgefunds_new2_infotable.loc[:,"infotable_link"] = "https://www.sec.gov" + all_hedgefunds_new2_infotable["infotable_link"]
 ```
-After that, you want to get the link to the actual information table from the html webpage. This can be done using Beautiful Soup as well, and an example of where this process is taking you on the SEC website is listed below.
+After that, you want to get the link to the actual information table from the html webpage. This can be done using requests and Beautiful Soup as well, and an example of where this process is taking you on the SEC website is shown below.
 
 <p align="center">
 <img src="https://github.com/austenw1899/PICTURES-FOR-BLOG/blob/main/1b.jpg?raw=true"/>
@@ -136,13 +136,13 @@ for i in range(0,len(holdings_df)):
         holdings.to_csv(file_name)
 ```
 
-Now you have saved the 13-F forms for each hedge fund in .csv form with all the relevant information (holdings, etc.).
+Now you have saved the 13F forms for each hedge fund in .csv form with all the relevant information (holdings, value, etc.).
 
 ### Note
 
 *This process will only work with 13F forms that are all in the same, current format, so forms before 2013 will not be able to be parsed and put into a dataframe with this code.*
 
-We, personally, were not too worried about including data from before 2013 as we wanted to use this database to evaluate the near past, present, and future, but if you'd like to include that data you will have to use a different process to parse.
+We, personally, were not too worried about including data from before 2013 as we wanted to use this database to evaluate the near past, present, and future, but if you'd like to include that data you will have to use an additional different process to parse.
 
 ### Example
 
@@ -159,7 +159,7 @@ Step 2: Calculate Change in Holdings between Quarters
 </h1>
 
 ### Intro
-Once we had all of our parsed dataframes, we decided to calculate the total changes in holdings between quarters for all of the hedge funds in our database. If you would like to calculate other metrics from filing to filing, you can use a similar process to the one that follows:
+Once we obtained all of our parsed dataframes, we decided to calculate the total changes in holdings between quarters for all of the hedge funds in our database. If you would like to calculate other metrics from filing to filing, you can use a similar process to the one that follows:
 
 ### Code for creating change dataframes
 Specify your root path and ensure that you have installed the pandas, os, and itertools packages.
@@ -180,7 +180,7 @@ Often, hedge funds will acquire a new stock over a quarterly period, or they wil
 Similarly to finding new holdings, you must also determine if any holdings were sold out in the previous quarter. The code to accomplish that is bracketed and listed above.
 
 After you have determined which holdings are new and sold out, you can create 3 new dataframes consisting of all 3 scenarios (New, Not New, Sold Out).
-Then, you can initialize a larger dataframe containing information of all the holdings. With this information it is now possible to calculate the changes in holdings from quarter to quarter. By creating a subset of holdings that were in both the new and old filings, you can write an equation to calculate change metrics. 
+Then, you can initialize a larger dataframe containing information of all the holdings. With this information it is now possible to calculate the changes in holdings from quarter to quarter. By creating a subset of holdings that were in both the new and old filings, you can write an equation to calculate the change metrics. 
 
 <p align="left">
 <img src="https://github.com/austenw1899/PICTURES-FOR-BLOG/blob/main/2-3.jpg?raw=true"/>
@@ -235,7 +235,7 @@ import functools
 company_root_path = "folder with 13F data"
 change_root_path = "folder with change data"
 ```
-Next, begin creating your database. The following Python code shows how to create a database in MongoDB. We decided to create three collections: "Hedge Fund," "Holdings," and "Changes."
+Next, begin creating your database. The following Python code shows how to create a database in MongoDB. We decided to create three collections: "Hedge Fund," "Holdings," and "Changes." The "Hedge Fund" collection holds the latest information, while the other two collections act as archival recordings due to size limits on MongoDB documents.
 
 ```python
 client = MongoClient('localhost', 27017)
@@ -315,7 +315,7 @@ An image of what our database within MongoDB looks like is above. This is throug
 Step 4: Periodical Updates
 </h1>
 
-There are five main parts of periodically updating the database within MongoDB.
+There are five main functions to use in order to periodically update the database within MongoDB. These can be used without detailed or technical knowledge of the process, making it accessible to those with limited Python background.
 
 <p align="left">
 <img src="https://github.com/austenw1899/PICTURES-FOR-BLOG/blob/main/4.jpg?raw=true"/>
